@@ -50,7 +50,7 @@ def analyze_series(data, LSL, USL):
     # return dict(N=n, Min=s.min(), Max=s.max(), Avg=mu, Cpk=cpk, SD=sd)
 
 
-    mean_val = data.mean()
+    mean_val = data.abs().mean()
     std_sample = data.std()
     # std_pop = data.std(ddof=0)
     n = len(data)
@@ -75,11 +75,13 @@ def plot_save(series, title, LSL, USL, avg, cpk, min_val, max_val, out_png):
     mu, std = np.mean(series), np.std(series, ddof=1)
 
     if std > 0:  # 표준편차가 0이면 pdf 그릴 수 없음
-        x = np.linspace(min(series), max(series), 200)
+        # 기존: x = np.linspace(min(series), max(series), 200)
+        # 수정: 평균 ± 4σ 범위로 넓게 설정
+        x = np.linspace(mu - 4*std, mu + 4*std, 400)
         y = norm.pdf(x, mu, std)
         plt.plot(x, y, 'k-', linewidth=2.5)
-        # 빨간 점선 (위에 겹침)
         plt.plot(x, y, 'r--', linewidth=2.0)
+
         
     # LSL, USL
     if LSL is not None: 
@@ -236,3 +238,4 @@ if summary:
 else:
     print("⚠ 분석된 데이터가 없습니다. 헤더 위치·열 인덱스 확인하세요.")
 # ───────────────────────────────────────────────────────────
+
